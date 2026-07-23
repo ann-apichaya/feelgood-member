@@ -85,8 +85,8 @@
   </div>
 
   <div class="tabs" id="tabs" style="display:none;">
-    <div class="tab active" onclick="switchTab('add')">เพิ่มแต้ม</div>
-    <div class="tab" onclick="switchTab('redeem')">แลกรางวัล</div>
+    <div class="tab active" onclick="switchTab('add', event)">เพิ่มแต้ม</div>
+    <div class="tab" onclick="switchTab('redeem', event)">แลกรางวัล</div>
   </div>
 
   <div class="box panel active" id="panelAdd" style="display:none;">
@@ -176,9 +176,9 @@ function renderMember() {
   document.getElementById('mPoints').innerHTML = currentMember.points + ' <span>แต้มคงเหลือ</span>';
 }
 
-function switchTab(tab) {
+function switchTab(tab, evt) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
+  evt.currentTarget.classList.add('active');
   document.getElementById('panelAdd').style.display = tab === 'add' ? 'block' : 'none';
   document.getElementById('panelRedeem').style.display = tab === 'redeem' ? 'block' : 'none';
 }
