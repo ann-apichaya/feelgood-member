@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ระบบพนักงาน - แต้มสมาชิกฟิวกู้ด</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF6EE; --forest:#2C4A3B; --forest-deep:#1D3329;
+    --gold:#C79A34; --text:#233029; --line:#E4DCC8; --err:#B3452C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--cream); font-family:'Sarabun',sans-serif; color:var(--text);
+    min-height:100vh; padding:20px 16px 60px; display:flex; justify-content:center;
+  }
+  .wrap{width:100%;max-width:440px;}
+  h1{
+    font-family:'Kanit',sans-serif; font-size:19px; color:var(--forest);
+    margin-bottom:16px; text-align:center;
+  }
+  .box{
+    background:#fff; border:1px solid var(--line); border-radius:16px;
+    padding:18px; margin-bottom:14px;
+  }
+  label{font-size:13px; color:#6b7a71; display:block; margin-bottom:6px;}
+  input, select{
+    width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--line);
+    font-family:'Sarabun',sans-serif; font-size:15px; margin-bottom:12px;
+  }
+  button{
+    width:100%; padding:13px; border:none; border-radius:10px;
+    background:var(--forest); color:#fff; font-family:'Kanit',sans-serif;
+    font-weight:600; font-size:15px; cursor:pointer;
+  }
+  button.secondary{background:#EFEADA; color:var(--forest);}
+  button:disabled{opacity:0.5;}
+
+  .member-info{
+    display:none;
+    background:var(--forest); color:#fff; border-radius:14px;
+    padding:16px; margin-bottom:14px;
+  }
+  .member-info .name{font-family:'Kanit',sans-serif; font-weight:600; font-size:17px;}
+  .member-info .sub{font-size:13px; opacity:0.8; margin-top:2px;}
+  .member-info .points{
+    font-family:'Kanit',sans-serif; font-weight:700; font-size:28px; margin-top:10px;
+  }
+  .member-info .points span{font-size:13px; font-weight:400; opacity:0.8;}
+
+  .msg{
+    font-size:13.5px; padding:10px 12px; border-radius:10px; margin-top:10px; display:none;
+  }
+  .msg.ok{background:#E8F0E6; color:var(--forest); display:block;}
+  .msg.error{background:#F7E5E0; color:var(--err); display:block;}
+
+  .tabs{display:flex; gap:8px; margin-bottom:14px;}
+  .tab{
+    flex:1; text-align:center; padding:10px; border-radius:10px;
+    background:#fff; border:1px solid var(--line); font-size:14px; cursor:pointer;
+    font-family:'Kanit',sans-serif; font-weight:500; color:#6b7a71;
+  }
+  .tab.active{background:var(--forest); color:#fff; border-color:var(--forest);}
+  .panel{display:none;}
+  .panel.active{display:block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>ระบบพนักงาน · แต้มสมาชิกฟิวกู้ด</h1>
+
+  <div class="box">
+    <label>ค้นหาสมาชิกด้วยเบอร์โทร</label>
+    <input type="tel" id="searchPhone" placeholder="0812345678" maxlength="10">
+    <button onclick="searchMember()">ค้นหา</button>
+    <div class="msg" id="searchMsg"></div>
+  </div>
+
+  <div class="member-info" id="memberInfo">
+    <div class="name" id="mName">-</div>
+    <div class="sub" id="mId">-</div>
+    <div class="points" id="mPoints">0 <span>แต้มคงเหลือ</span></div>
+  </div>
+
+  <div class="tabs" id="tabs" style="display:none;">
+    <div class="tab active" onclick="switchTab('add')">เพิ่มแต้ม</div>
+    <div class="tab" onclick="switchTab('redeem')">แลกรางวัล</div>
+  </div>
+
+  <div class="box panel active" id="panelAdd" style="display:none;">
+    <label>ยอดบิลที่จ่ายจริง (บาท)</label>
+    <input type="number" id="billAmount" placeholder="เช่น 250">
+    <div style="font-size:12px;color:#B3452C;margin-top:-6px;margin-bottom:12px;">
+      ห้ามรวมยอดอาหารเช้าโรงแรม/บุฟเฟ่ต์ — กรอกเฉพาะยอดที่ลูกค้าจ่ายเงินจริงเท่านั้น
+    </div>
+    <label>ชื่อพนักงานที่บันทึก</label>
+    <input type="text" id="staffNameAdd" placeholder="ชื่อพนักงาน">
+    <button onclick="addPoints()">บันทึกแต้ม</button>
+    <div class="msg" id="addMsg"></div>
+  </div>
+
+  <div class="box panel" id="panelRedeem" style="display:none;">
+    <label>เลือกรางวัลที่จะแลก</label>
+    <select id="rewardTier">
+      <option value="10">10 แต้ม — เครื่องดื่มฟรี 1 แก้ว</option>
+      <option value="25">25 แต้ม — เมนูจานเดียวฟรี 1 จาน</option>
+      <option value="50">50 แต้ม — ส่วนลด 15% มื้อถัดไป</option>
+    </select>
+    <label>ชื่อพนักงานที่บันทึก</label>
+    <input type="text" id="staffNameRedeem" placeholder="ชื่อพนักงาน">
+    <button onclick="redeem()">ยืนยันแลกรางวัล</button>
+    <div class="msg" id="redeemMsg"></div>
+  </div>
+</div>
+
+<script>
+// TODO: แก้เป็น Web App URL จริงหลัง deploy Apps Script แล้ว (ค่าเดียวกับใน card.html)
+const API_URL = 'https://script.google.com/macros/s/AKfycbyDoNZVN_uCL2t5_N88D01kpxdwrXEXXrLpwrxAW8L-ZZdNVSvTly7aVX82luVuOvZ0KQ/exec';
+
+let currentMember = null;
+
+// JSONP helper เหมือนกับ card.html เพื่อเลี่ยงปัญหา CORS
+function jsonp(action, params) {
+  return new Promise((resolve, reject) => {
+    const callbackName = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    window[callbackName] = (data) => {
+      resolve(data);
+      delete window[callbackName];
+      script.remove();
+    };
+    let url = API_URL + '?action=' + action + '&callback=' + callbackName;
+    for (const key in params) {
+      url += '&' + key + '=' + encodeURIComponent(params[key]);
+    }
+    const script = document.createElement('script');
+    script.src = url;
+    script.onerror = () => reject(new Error('เรียก API ไม่สำเร็จ'));
+    document.body.appendChild(script);
+  });
+}
+
+function showMsg(id, text, ok) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'msg ' + (ok ? 'ok' : 'error');
+}
+
+async function searchMember() {
+  const phone = document.getElementById('searchPhone').value.trim();
+  if (!/^0[0-9]{9}$/.test(phone)) {
+    showMsg('searchMsg', 'กรอกเบอร์โทร 10 หลักให้ถูกต้อง', false);
+    return;
+  }
+  const res = await jsonp('findByPhone', { phone: phone });
+  if (res.success && res.found) {
+    currentMember = res.member;
+    document.getElementById('searchMsg').style.display = 'none';
+    renderMember();
+  } else {
+    document.getElementById('memberInfo').style.display = 'none';
+    document.getElementById('tabs').style.display = 'none';
+    document.getElementById('panelAdd').style.display = 'none';
+    document.getElementById('panelRedeem').style.display = 'none';
+    showMsg('searchMsg', 'ไม่พบเบอร์นี้ในระบบ ลูกค้าต้องสมัครผ่านบัตรสมาชิกใน LINE ก่อน', false);
+  }
+}
+
+function renderMember() {
+  document.getElementById('memberInfo').style.display = 'block';
+  document.getElementById('tabs').style.display = 'flex';
+  document.getElementById('panelAdd').style.display = 'block';
+  document.getElementById('mName').textContent = currentMember.name;
+  document.getElementById('mId').textContent = currentMember.memberId + ' · ' + currentMember.phone;
+  document.getElementById('mPoints').innerHTML = currentMember.points + ' <span>แต้มคงเหลือ</span>';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panelAdd').style.display = tab === 'add' ? 'block' : 'none';
+  document.getElementById('panelRedeem').style.display = tab === 'redeem' ? 'block' : 'none';
+}
+
+async function addPoints() {
+  const bill = Number(document.getElementById('billAmount').value);
+  const staff = document.getElementById('staffNameAdd').value.trim();
+  if (!bill || bill <= 0) {
+    showMsg('addMsg', 'กรอกยอดบิลให้ถูกต้อง', false);
+    return;
+  }
+  if (!staff) {
+    showMsg('addMsg', 'กรอกชื่อพนักงานที่บันทึก', false);
+    return;
+  }
+  const res = await jsonp('addPoints', { memberId: currentMember.memberId, billAmount: bill, staff: staff });
+  if (res.success) {
+    currentMember.points = res.newBalance;
+    renderMember();
+    showMsg('addMsg', 'บันทึกสำเร็จ ได้ ' + res.earnedPoints + ' แต้ม (คงเหลือ ' + res.newBalance + ' แต้ม)', true);
+    document.getElementById('billAmount').value = '';
+  } else {
+    showMsg('addMsg', res.error, false);
+  }
+}
+
+async function redeem() {
+  const tier = document.getElementById('rewardTier').value;
+  const staff = document.getElementById('staffNameRedeem').value.trim();
+  if (!staff) {
+    showMsg('redeemMsg', 'กรอกชื่อพนักงานที่บันทึก', false);
+    return;
+  }
+  const res = await jsonp('redeem', { memberId: currentMember.memberId, tier: tier, staff: staff });
+  if (res.success) {
+    currentMember.points = res.newBalance;
+    renderMember();
+    showMsg('redeemMsg', 'แลก "' + res.rewardLabel + '" สำเร็จ (คงเหลือ ' + res.newBalance + ' แต้ม)', true);
+  } else {
+    showMsg('redeemMsg', res.error, false);
+  }
+}
+</script>
+</body>
+</html>

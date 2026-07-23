@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>บัตรสมาชิกฟิวกู้ด</title>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700&family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF6EE;
+    --forest:#2C4A3B;
+    --forest-deep:#1D3329;
+    --sage:#9CB89A;
+    --gold:#C79A34;
+    --text:#233029;
+    --line:#E4DCC8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    font-family:'Sarabun',sans-serif;
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding:20px 16px 40px;
+  }
+  .wrap{width:100%;max-width:420px;}
+
+  /* ----- สถานะโหลด ----- */
+  #loading{
+    text-align:center;
+    padding-top:80px;
+    color:var(--forest);
+    font-family:'Kanit',sans-serif;
+  }
+
+  /* ----- การ์ดสมาชิก ----- */
+  .card{
+    display:none;
+    background:linear-gradient(155deg, var(--forest) 0%, var(--forest-deep) 100%);
+    border-radius:20px;
+    padding:24px 22px 20px;
+    color:#fff;
+    box-shadow:0 12px 30px rgba(29,51,41,0.25);
+    position:relative;
+    overflow:hidden;
+  }
+  .card::after{
+    content:"";
+    position:absolute;
+    right:-40px; top:-40px;
+    width:140px; height:140px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.05);
+  }
+  .brand{
+    font-family:'Kanit',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:1px;
+    opacity:0.85;
+    text-transform:uppercase;
+  }
+  .member-name{
+    font-family:'Kanit',sans-serif;
+    font-weight:700;
+    font-size:22px;
+    margin-top:4px;
+  }
+  .member-id{
+    font-size:13px;
+    opacity:0.7;
+    margin-top:2px;
+    letter-spacing:0.5px;
+  }
+
+  /* ----- แก้วกาแฟแสดงแต้ม (signature element) ----- */
+  .cup-row{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    margin-top:22px;
+  }
+  .cup-svg{flex-shrink:0;}
+  .cup-info{flex:1;}
+  .points-num{
+    font-family:'Kanit',sans-serif;
+    font-weight:700;
+    font-size:34px;
+    line-height:1;
+  }
+  .points-label{font-size:13px;opacity:0.8;margin-top:2px;}
+  .next-reward{
+    margin-top:10px;
+    font-size:13px;
+    background:rgba(255,255,255,0.12);
+    border-radius:10px;
+    padding:8px 10px;
+    line-height:1.5;
+  }
+  .next-reward b{color:var(--gold);}
+
+  /* ----- รายการรางวัล ----- */
+  .rewards{
+    margin-top:18px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .reward-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:12px 14px;
+  }
+  .reward-item.locked{opacity:0.55;}
+  .reward-title{font-weight:600;font-size:14.5px;}
+  .reward-sub{font-size:12px;color:#6b7a71;margin-top:2px;}
+  .reward-badge{
+    font-family:'Kanit',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    color:var(--forest);
+    background:#EFEADA;
+    border-radius:20px;
+    padding:4px 10px;
+    white-space:nowrap;
+  }
+  .reward-badge.unlocked{
+    color:#fff;
+    background:var(--gold);
+  }
+
+  .section-title{
+    font-family:'Kanit',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    margin:22px 0 10px 2px;
+    color:var(--forest);
+  }
+
+  .note{
+    margin-top:18px;
+    font-size:12px;
+    color:#8a8574;
+    text-align:center;
+    line-height:1.6;
+  }
+
+  /* ----- ฟอร์มสมัครสมาชิก ----- */
+  #register{
+    display:none;
+    background:#fff;
+    border-radius:18px;
+    padding:26px 22px;
+    border:1px solid var(--line);
+  }
+  #register h2{
+    font-family:'Kanit',sans-serif;
+    color:var(--forest);
+    font-size:19px;
+    margin-bottom:6px;
+  }
+  #register p{font-size:13.5px;color:#6b7a71;margin-bottom:18px;line-height:1.6;}
+  #register input{
+    width:100%;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    font-family:'Sarabun',sans-serif;
+    font-size:15px;
+    margin-bottom:12px;
+  }
+  #register button{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:10px;
+    background:var(--forest);
+    color:#fff;
+    font-family:'Kanit',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+  }
+  #register .err{color:#B3452C;font-size:13px;margin-top:8px;display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="loading">กำลังโหลดบัตรสมาชิก...</div>
+
+  <!-- ฟอร์มสมัครสมาชิกใหม่ (แสดงถ้ายังไม่เป็นสมาชิก) -->
+  <div id="register">
+    <h2>สมัครสมาชิกฟิวกู้ด</h2>
+    <p>กรอกเบอร์โทรเพื่อเริ่มสะสมแต้ม ทุก 50 บาทที่จ่ายจริงในร้าน = 1 แต้ม</p>
+    <input type="tel" id="phoneInput" placeholder="เบอร์โทรศัพท์" maxlength="10">
+    <button onclick="submitRegister()">สมัครสมาชิก</button>
+    <div class="err" id="registerErr"></div>
+  </div>
+
+  <!-- การ์ดสมาชิก (แสดงถ้าเป็นสมาชิกแล้ว) -->
+  <div class="card" id="card">
+    <div class="brand">Feel Good Cafe · Member</div>
+    <div class="member-name" id="memberName">-</div>
+    <div class="member-id" id="memberId">-</div>
+
+    <div class="cup-row">
+      <svg class="cup-svg" width="64" height="76" viewBox="0 0 64 76">
+        <path d="M8 10 H56 L50 62 Q49 70 40 70 H24 Q15 70 14 62 Z"
+              fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M56 18 H62 Q66 18 66 26 V28 Q66 36 58 36 H54"
+              fill="none" stroke="#fff" stroke-width="3"/>
+        <clipPath id="cupClip">
+          <path d="M8 10 H56 L50 62 Q49 70 40 70 H24 Q15 70 14 62 Z"/>
+        </clipPath>
+        <rect id="cupFill" x="8" y="70" width="48" height="0" fill="#C79A34" clip-path="url(#cupClip)"/>
+      </svg>
+      <div class="cup-info">
+        <div class="points-num" id="pointsNum">0</div>
+        <div class="points-label">แต้มคงเหลือ</div>
+      </div>
+    </div>
+
+    <div class="next-reward" id="nextRewardBox">กำลังโหลด...</div>
+  </div>
+
+  <div class="section-title" id="rewardsTitle" style="display:none;">ของรางวัลที่แลกได้</div>
+  <div class="rewards" id="rewardsList"></div>
+
+  <div class="note" id="noteBox" style="display:none;">
+    แต้มมีอายุ 6 เดือนนับจากวันได้แต้มล่าสุด · แสดงบัตรนี้ให้พนักงานตอนชำระเงินทุกครั้ง
+  </div>
+
+</div>
+
+<script>
+// ===================== ตั้งค่า =====================
+const LIFF_ID = '2010818148-1uZxRTUR';
+// TODO: แก้เป็น Web App URL จริงหลัง deploy Apps Script แล้ว
+const API_URL = 'https://script.google.com/macros/s/AKfycbyDoNZVN_uCL2t5_N88D01kpxdwrXEXXrLpwrxAW8L-ZZdNVSvTly7aVX82luVuOvZ0KQ/exec';
+
+const REWARD_TIERS = [
+  { points: 10, label: 'เครื่องดื่มฟรี 1 แก้ว' },
+  { points: 25, label: 'เมนูจานเดียวฟรี 1 จาน' },
+  { points: 50, label: 'ส่วนลด 15% มื้อถัดไป' }
+];
+
+let profile = null;
+
+// ===================== JSONP helper =====================
+// ใช้ JSONP เพราะ GitHub Pages กับ Apps Script คนละโดเมนกัน เจอปัญหา CORS
+// ถ้าเรียกแบบ fetch ปกติตรงๆ (แบบเดียวกับที่แก้ปัญหาไว้ใน maintenance-hotel)
+function jsonp(action, params) {
+  return new Promise((resolve, reject) => {
+    const callbackName = 'cb_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    window[callbackName] = (data) => {
+      resolve(data);
+      delete window[callbackName];
+      script.remove();
+    };
+    let url = API_URL + '?action=' + action + '&callback=' + callbackName;
+    for (const key in params) {
+      url += '&' + key + '=' + encodeURIComponent(params[key]);
+    }
+    const script = document.createElement('script');
+    script.src = url;
+    script.onerror = () => reject(new Error('เรียก API ไม่สำเร็จ'));
+    document.body.appendChild(script);
+  });
+}
+
+// ===================== เริ่มทำงาน =====================
+async function init() {
+  await liff.init({ liffId: LIFF_ID });
+  if (!liff.isLoggedIn()) {
+    liff.login();
+    return;
+  }
+  profile = await liff.getProfile();
+
+  const res = await jsonp('getMember', { lineUserId: profile.userId });
+  document.getElementById('loading').style.display = 'none';
+
+  if (res.success && res.found) {
+    renderCard(res.member);
+  } else {
+    document.getElementById('register').style.display = 'block';
+  }
+}
+
+// ===================== สมัครสมาชิก =====================
+async function submitRegister() {
+  const phone = document.getElementById('phoneInput').value.trim();
+  const errBox = document.getElementById('registerErr');
+  errBox.style.display = 'none';
+
+  if (!/^0[0-9]{9}$/.test(phone)) {
+    errBox.textContent = 'กรอกเบอร์โทร 10 หลักให้ถูกต้อง';
+    errBox.style.display = 'block';
+    return;
+  }
+
+  const res = await jsonp('register', {
+    lineUserId: profile.userId,
+    displayName: profile.displayName,
+    phone: phone
+  });
+
+  if (res.success) {
+    document.getElementById('register').style.display = 'none';
+    renderCard(res.member);
+  } else {
+    errBox.textContent = res.error || 'สมัครไม่สำเร็จ ลองใหม่อีกครั้ง';
+    errBox.style.display = 'block';
+  }
+}
+
+// ===================== แสดงการ์ด =====================
+function renderCard(member) {
+  document.getElementById('card').style.display = 'block';
+  document.getElementById('rewardsTitle').style.display = 'block';
+  document.getElementById('noteBox').style.display = 'block';
+
+  document.getElementById('memberName').textContent = member.name || profile.displayName;
+  document.getElementById('memberId').textContent = member.memberId;
+  document.getElementById('pointsNum').textContent = member.points;
+
+  // เติมกาแฟในแก้วตามสัดส่วนแต้มเทียบกับรางวัลถัดไป
+  const nextTier = REWARD_TIERS.find(t => t.points > member.points) || REWARD_TIERS[REWARD_TIERS.length - 1];
+  const prevTierPoints = REWARD_TIERS.filter(t => t.points <= member.points).slice(-1)[0]?.points || 0;
+  const range = nextTier.points - prevTierPoints || nextTier.points;
+  const progress = Math.min(1, (member.points - prevTierPoints) / range);
+  const fillHeight = 60 * progress;
+  const fill = document.getElementById('cupFill');
+  fill.setAttribute('y', 70 - fillHeight);
+  fill.setAttribute('height', fillHeight);
+
+  const nextBox = document.getElementById('nextRewardBox');
+  if (member.points >= REWARD_TIERS[REWARD_TIERS.length - 1].points) {
+    nextBox.innerHTML = 'สะสมครบทุกระดับรางวัลแล้ว แจ้งพนักงานเพื่อแลกได้เลย';
+  } else {
+    const remain = nextTier.points - member.points;
+    nextBox.innerHTML = 'อีก <b>' + remain + ' แต้ม</b> รับ ' + nextTier.label;
+  }
+
+  const list = document.getElementById('rewardsList');
+  list.innerHTML = '';
+  REWARD_TIERS.forEach(t => {
+    const unlocked = member.points >= t.points;
+    const item = document.createElement('div');
+    item.className = 'reward-item' + (unlocked ? '' : ' locked');
+    item.innerHTML =
+      '<div><div class="reward-title">' + t.label + '</div>' +
+      '<div class="reward-sub">ใช้ ' + t.points + ' แต้ม</div></div>' +
+      '<div class="reward-badge' + (unlocked ? ' unlocked' : '') + '">' +
+      (unlocked ? 'แลกได้' : t.points + ' แต้ม') + '</div>';
+    list.appendChild(item);
+  });
+}
+
+init().catch(err => {
+  document.getElementById('loading').textContent = 'เกิดข้อผิดพลาด: ' + err.message;
+});
+</script>
+</body>
+</html>
